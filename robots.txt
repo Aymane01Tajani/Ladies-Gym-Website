@@ -1,0 +1,12 @@
+# Ladies Coaching By Rabia BAHOU
+# https://ladiescoaching.ma
+
+User-agent: *
+Allow: /
+Disallow: /Assets/Salle/videos/
+
+# Sitemap
+Sitemap: https://ladiescoaching.ma/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
