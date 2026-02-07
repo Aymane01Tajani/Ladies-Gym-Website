@@ -714,7 +714,7 @@ input, textarea, select {
 
 .ems-featured__video {
     width: 100%;
-    max-width: 500px;
+    max-width: 350px;
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
@@ -724,6 +724,7 @@ input, textarea, select {
 .ems-featured__video video {
     width: 100%;
     height: auto;
+    max-height: 400px;
     display: block;
     object-fit: cover;
 }
