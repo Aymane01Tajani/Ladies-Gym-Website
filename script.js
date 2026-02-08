@@ -577,13 +577,16 @@ const selectedCountry = document.getElementById('selectedCountry');
 const countryDropdown = document.getElementById('countryDropdown');
 const countryCodeInput = document.getElementById('countryCode');
 const customCountryCodeInput = document.getElementById('customCountryCode');
-const countryOptions = document.querySelectorAll('.country-option');
 
 if (selectedCountry && countryDropdown) {
+    // Scope options to ONLY the contact form dropdown
+    const countryOptions = countryDropdown.querySelectorAll('.country-option');
+
     // Toggle dropdown
     selectedCountry.addEventListener('click', (e) => {
         e.stopPropagation();
         countrySelector.classList.toggle('open');
+        countryDropdown.classList.toggle('show');
     });
 
     // Select country
@@ -621,6 +624,7 @@ if (selectedCountry && countryDropdown) {
             
             // Close dropdown
             countrySelector.classList.remove('open');
+            countryDropdown.classList.remove('show');
         });
     });
 
@@ -635,6 +639,7 @@ if (selectedCountry && countryDropdown) {
     document.addEventListener('click', (e) => {
         if (!countrySelector.contains(e.target)) {
             countrySelector.classList.remove('open');
+            countryDropdown.classList.remove('show');
         }
     });
 }
@@ -648,40 +653,60 @@ const bookingCustomCountryCodeInput = document.getElementById('bookingCustomCoun
 
 if (bookingCountrySelector && bookingSelectedCountry && bookingCountryDropdown) {
     // Toggle dropdown
-    bookingSelectedCountry.addEventListener('click', () => {
+    bookingSelectedCountry.addEventListener('click', (e) => {
+        e.stopPropagation();
+        bookingCountrySelector.classList.toggle('open');
         bookingCountryDropdown.classList.toggle('show');
     });
 
-    // Select country from dropdown
+    // Select country from dropdown (scoped to booking dropdown only)
     const bookingCountryOptions = bookingCountryDropdown.querySelectorAll('.country-option');
     bookingCountryOptions.forEach(option => {
         option.addEventListener('click', () => {
-            const countryCode = option.getAttribute('data-code');
-            const countryName = option.getAttribute('data-name');
-            const flagClass = option.querySelector('.country-flag').className;
+            const code = option.getAttribute('data-code');
+            const country = option.getAttribute('data-country');
 
-            if (countryCode === 'other') {
+            if (country === 'other') {
                 // Show custom input for "Autre pays"
-                bookingSelectedCountry.innerHTML = `<span class="country-flag globe-icon">🌍</span><span>${countryName}</span><i class="fas fa-chevron-down"></i>`;
+                bookingSelectedCountry.innerHTML = `
+                    <span class="other-icon"><i class="fas fa-globe"></i></span>
+                    <span class="country-dial-code">Autre</span>
+                    <i class="fas fa-chevron-down"></i>
+                `;
                 bookingCountryCodeInput.value = '';
                 bookingCustomCountryCodeInput.style.display = 'block';
                 bookingCustomCountryCodeInput.required = true;
+                bookingCustomCountryCodeInput.focus();
             } else {
                 // Use predefined country
-                bookingSelectedCountry.innerHTML = `<span class="${flagClass}"></span><span>${countryCode}</span><i class="fas fa-chevron-down"></i>`;
-                bookingCountryCodeInput.value = countryCode;
+                bookingSelectedCountry.innerHTML = `
+                    <span class="fi fi-${country}"></span>
+                    <span class="country-dial-code">${code}</span>
+                    <i class="fas fa-chevron-down"></i>
+                `;
+                bookingCountryCodeInput.value = code;
                 bookingCustomCountryCodeInput.style.display = 'none';
                 bookingCustomCountryCodeInput.required = false;
                 bookingCustomCountryCodeInput.value = '';
             }
 
+            // Close dropdown
+            bookingCountrySelector.classList.remove('open');
             bookingCountryDropdown.classList.remove('show');
         });
     });
 
+    // Update hidden input when custom code is entered
+    if (bookingCustomCountryCodeInput) {
+        bookingCustomCountryCodeInput.addEventListener('input', () => {
+            bookingCountryCodeInput.value = bookingCustomCountryCodeInput.value;
+        });
+    }
+
     // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
         if (!bookingCountrySelector.contains(e.target)) {
+            bookingCountrySelector.classList.remove('open');
             bookingCountryDropdown.classList.remove('show');
         }
     });
