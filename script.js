@@ -681,7 +681,7 @@ if (bookingType) {
             bilanDoneCheckbox.required = false;
             bilanDoneCheckbox.disabled = true;
             bilanDoneCheckbox.checked = false;
-            submitBtnText.textContent = 'Réserver mon bilan gratuit';
+            submitBtnText.textContent = 'Réserver mon bilan';
         } else if (selectedType === 'ems') {
             // Hide services interest, show EMS confirmation
             servicesInterestGroup.style.display = 'none';
@@ -696,7 +696,7 @@ if (bookingType) {
             bilanDoneCheckbox.required = false;
             bilanDoneCheckbox.disabled = true;
             bilanDoneCheckbox.checked = false;
-            submitBtnText.textContent = 'Réserver mon bilan gratuit';
+            submitBtnText.textContent = 'Réserver mon bilan';
         }
     });
 }
