@@ -5,7 +5,9 @@ const navToggle = document.getElementById('nav-toggle');
 const navClose = document.getElementById('nav-close');
 const navLinks = document.querySelectorAll('.nav__link');
 const backToTop = document.getElementById('backToTop');
-const contactForm = document.getElementById('contactForm');
+// ===== EMAILJS INITIALIZATION =====
+// TODO: Replace with your actual EmailJS credentials (see instructions below)
+emailjs.init('1WfQ7RN4R4QIyi8eL');
 
 // ===== NAVIGATION =====
 // Toggle mobile menu
@@ -196,43 +198,7 @@ if (sliderContainer) {
     });
 }
 
-// ===== CONTACT FORM =====
-if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        // Get form data
-        const formData = new FormData(contactForm);
-        const data = Object.fromEntries(formData);
-        
-        // Simple validation
-        if (!data.name || !data.email || !data.message) {
-            showNotification('Veuillez remplir tous les champs obligatoires.', 'error');
-            return;
-        }
-        
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(data.email)) {
-            showNotification('Veuillez entrer une adresse email valide.', 'error');
-            return;
-        }
-        
-        // Simulate form submission
-        const submitBtn = contactForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
-        submitBtn.disabled = true;
-        
-        // Simulate API call
-        setTimeout(() => {
-            showNotification('Message envoyé avec succès ! Nous vous répondrons rapidement.', 'success');
-            contactForm.reset();
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        }, 1500);
-    });
-}
+
 
 // ===== NOTIFICATION SYSTEM =====
 function showNotification(message, type = 'success') {
@@ -749,33 +715,49 @@ if (bookingForm) {
         }
         
         // Collect form data
-        const data = {
-            name: formData.get('name'),
-            email: formData.get('email'),
-            phone: formData.get('phone'),
-            bookingType: bookingTypeValue,
+        const countryCode = formData.get('countryCode') || formData.get('customCountryCode') || '+212';
+        const interests = formData.getAll('interests[]');
+        
+        const templateParams = {
+            from_name: formData.get('name'),
+            from_email: formData.get('email'),
+            phone: countryCode + ' ' + formData.get('phone'),
+            booking_type: bookingTypeValue === 'bilan' ? 'Bilan Initial' : 'Séance EMS Directe',
             date: formData.get('date'),
-            time: formData.get('time')
+            time: formData.get('time'),
+            interests: bookingTypeValue === 'bilan' ? (interests.join(', ') || 'Non spécifié') : 'EMS uniquement'
         };
         
-        if (bookingTypeValue === 'bilan') {
-            const interests = formData.getAll('interests[]');
-            data.interests = interests.join(', ') || 'Non spécifié';
-        }
+        // Show loading state
+        const submitBtn = bookingForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
+        submitBtn.disabled = true;
         
-        console.log('Booking data:', data);
-        
-        // Show success message
-        const message = bookingTypeValue === 'bilan' 
-            ? 'Votre demande de bilan initial a été enregistrée ! Nous vous contacterons rapidement pour confirmer votre rendez-vous.'
-            : 'Votre réservation de séance EMS a été enregistrée ! Nous vous contacterons pour confirmation.';
-        
-        showNotification(message, 'success');
-        bookingForm.reset();
-        
-        // Reset visibility
-        servicesInterestGroup.style.display = 'block';
-        emsConfirmationGroup.style.display = 'none';
+        // Send email via EmailJS
+        // TODO: Replace 'YOUR_SERVICE_ID' and 'YOUR_TEMPLATE_ID' with your actual IDs
+        emailjs.send('service_tafgz3e', 'template_otjivvt', templateParams)
+            .then(() => {
+                const message = bookingTypeValue === 'bilan' 
+                    ? 'Votre demande de bilan initial a été envoyée ! Nous vous contacterons rapidement pour confirmer votre rendez-vous.'
+                    : 'Votre réservation de séance EMS a été envoyée ! Nous vous contacterons pour confirmation.';
+                
+                showNotification(message, 'success');
+                bookingForm.reset();
+                
+                // Reset visibility
+                servicesInterestGroup.style.display = 'block';
+                emsConfirmationGroup.style.display = 'none';
+                submitBtnText.textContent = 'Réserver mon bilan';
+            })
+            .catch((error) => {
+                console.error('EmailJS error:', error);
+                showNotification('Une erreur est survenue. Veuillez réessayer ou nous contacter par téléphone.', 'error');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
     });
 }
 
