@@ -787,17 +787,29 @@ input, textarea, select {
     margin-bottom: 1.5rem;
 }
 
+.partner__logos {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
 .partner__logo {
     max-width: 200px;
     height: auto;
     background: white;
     padding: 1rem 1.5rem;
     border-radius: 12px;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(201, 122, 138, 0.2);
 }
 
 .partner__logo:hover {
     transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    border-color: var(--color-primary);
 }
 
 .btn--small {
@@ -2399,6 +2411,11 @@ input, textarea, select {
     
     .ems-featured__partner {
         padding: 1.5rem;
+    }
+    
+    .partner__logos {
+        flex-direction: column;
+        gap: 1rem;
     }
     
     .partner__logo {
