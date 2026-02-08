@@ -147,22 +147,52 @@ dots.forEach((dot, index) => {
     });
 });
 
-// Auto-slide
-let slideInterval = setInterval(() => {
-    showSlide(currentSlide + 1);
-}, 5000);
+// Auto-slide - only when testimonials section is visible
+let slideInterval = null;
+let sliderVisible = false;
+let sliderHovered = false;
 
-// Pause on hover
-const sliderContainer = document.querySelector('.testimonials__slider');
-if (sliderContainer) {
-    sliderContainer.addEventListener('mouseenter', () => {
-        clearInterval(slideInterval);
-    });
-    
-    sliderContainer.addEventListener('mouseleave', () => {
+function startAutoSlide() {
+    if (!slideInterval && sliderVisible && !sliderHovered) {
         slideInterval = setInterval(() => {
             showSlide(currentSlide + 1);
         }, 5000);
+    }
+}
+
+function stopAutoSlide() {
+    if (slideInterval) {
+        clearInterval(slideInterval);
+        slideInterval = null;
+    }
+}
+
+const sliderContainer = document.querySelector('.testimonials__slider');
+const testimonialsSection = document.querySelector('#testimonials');
+
+if (testimonialsSection) {
+    const sliderObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            sliderVisible = entry.isIntersecting;
+            if (sliderVisible) {
+                startAutoSlide();
+            } else {
+                stopAutoSlide();
+            }
+        });
+    }, { threshold: 0.3 });
+    sliderObserver.observe(testimonialsSection);
+}
+
+if (sliderContainer) {
+    sliderContainer.addEventListener('mouseenter', () => {
+        sliderHovered = true;
+        stopAutoSlide();
+    });
+    
+    sliderContainer.addEventListener('mouseleave', () => {
+        sliderHovered = false;
+        startAutoSlide();
     });
 }
 
@@ -302,20 +332,17 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 // ===== ANIMATION ON SCROLL (Simple Implementation) =====
 function animateOnScroll() {
-    const elements = document.querySelectorAll('[data-aos]');
+    const elements = document.querySelectorAll('[data-aos]:not(.aos-animate)');
     
     elements.forEach(element => {
         const elementTop = element.getBoundingClientRect().top;
         const windowHeight = window.innerHeight;
         
         if (elementTop < windowHeight - 100) {
-            const animation = element.getAttribute('data-aos');
             const delay = element.getAttribute('data-aos-delay') || 0;
             
             setTimeout(() => {
                 element.classList.add('aos-animate');
-                element.style.opacity = '1';
-                element.style.transform = 'translateY(0) translateX(0) scale(1)';
             }, delay);
         }
     });
@@ -326,29 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const elements = document.querySelectorAll('[data-aos]');
     
     elements.forEach(element => {
-        const animation = element.getAttribute('data-aos');
-        element.style.opacity = '0';
-        element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        
-        switch(animation) {
-            case 'fade-up':
-                element.style.transform = 'translateY(30px)';
-                break;
-            case 'fade-down':
-                element.style.transform = 'translateY(-30px)';
-                break;
-            case 'fade-left':
-                element.style.transform = 'translateX(30px)';
-                break;
-            case 'fade-right':
-                element.style.transform = 'translateX(-30px)';
-                break;
-            case 'zoom-in':
-                element.style.transform = 'scale(0.9)';
-                break;
-            default:
-                element.style.transform = 'translateY(20px)';
-        }
+        element.classList.add('aos-init');
     });
     
     // Initial check
@@ -500,19 +505,7 @@ if (experienceNumber) {
 }
 
 // ===== SERVICE CARDS HOVER EFFECT =====
-const serviceCards = document.querySelectorAll('.service__card');
-
-serviceCards.forEach(card => {
-    card.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-10px)';
-    });
-    
-    card.addEventListener('mouseleave', function() {
-        if (!this.classList.contains('featured')) {
-            this.style.transform = 'translateY(0)';
-        }
-    });
-});
+// Handled purely via CSS to avoid JS transform conflicts with scroll animations
 
 // ===== FORM INPUT ANIMATION =====
 const formInputs = document.querySelectorAll('.form__group input, .form__group textarea, .form__group select');
@@ -541,16 +534,7 @@ window.addEventListener('load', () => {
 });
 
 // ===== PARALLAX EFFECT FOR HERO =====
-const hero = document.querySelector('.hero');
-
-if (hero) {
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        if (scrolled < window.innerHeight) {
-            hero.style.backgroundPositionY = `${scrolled * 0.5}px`;
-        }
-    });
-}
+// Removed JS-based parallax to prevent scroll jitter / auto-scrolling issues
 
 // ===== TYPING EFFECT FOR HERO TITLE (Optional Enhancement) =====
 // Uncomment if you want a typing effect
@@ -821,12 +805,4 @@ faqItems.forEach(item => {
 // ===== INITIALIZE =====
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Ladies Coaching website loaded successfully!');
-    
-    // Add fade-in animation to body
-    document.body.style.opacity = '0';
-    document.body.style.transition = 'opacity 0.5s ease';
-    
-    setTimeout(() => {
-        document.body.style.opacity = '1';
-    }, 100);
 });
